@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cloud4u.acm.repository.AuthRepo">
+
+	<insert id="insertAuth" parameterType="authDto">
+		INSERT INTO auth
+		(auth_id, auth_name, auth_status)
+		VALUES
+		(#{auth_id}, #{auth_name}, #{auth_status})
+	</insert>
+
+	<select id="selectAuth" parameterType="authDto" resultType="authDto">
+		SELECT *
+		FROM auth a, auth_endpoint e
+		<where>
+			a.auth_id = e.auth_id
+			<if test="auth_id != null and auth_id != ''">
+				AND auth_id = #{auth_id}
+			</if>
+			<if test="auth_name != null and auth_name != ''">
+				AND auth_name = #{auth_name}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertAuthEndpoints" parameterType="java.util.List">
+		INSERT INTO auth_endpoint
+		(auth_id, endpoint_ord)
+		VALUES
+		<foreach collection="list" item="item" separator=" , " >
+			(#{item.auth_id}, #{item.endpoint_ord})
+		</foreach>
+	</insert>
+
+	<delete id="deleteAuthEndpoints" parameterType="java.util.List">
+		DELETE FROM auth_endpoint
+		<where>
+			<foreach collection="list" item="item" open="" close="" separator="OR">
+				(auth_id = #{item.auth_id} AND endpoint_ord = #{item.endpoint_ord})
+			</foreach>
+		</where>
+	</delete>
+	
+	<select id="selectIdentityAuth" parameterType="java.lang.String" resultType="identityAuthDto">
+		SELECT i.iden_id, a.auth_name
+		FROM identity_auth i, auth a
+		WHERE
+			i.auth_id = a.auth_id
+			AND i.iden_id = #{iden_id}
+	</select>
+
+	<insert id="insertIdentityAuth" parameterType="java.util.List">
+		INSERT INTO identity_auth
+		(iden_id, auth_id)
+		VALUES
+		<foreach collection="list" item="item" separator=" ,">
+			(#{item.iden_id}, (SELECT auth_id FROM auth WHERE auth_id = )#{item.auth_id}))
+		</foreach>
+	</insert>
+	
+	<delete id="deleteIdentityAuth" parameterType="java.util.List">
+		DELETE FROM identity_auth
+		<where>
+			<foreach collection="list" item="item" open="" close="" separator="OR">
+				(iden_id = #{item.iden_id} AND auth_id = (SELECT auth_id FROM auth WHERE auth_id = )#{item.auth_id}))
+			</foreach>
+		</where>
+		WHERE iden_id = #{iden_id}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cloud4u.acm.repository.ValidateRepo">
+	<select id="select" parameterType="validateDto" resultType="validateDto">
+		SELECT *
+		FROM validate
+		WHERE
+		valid_id = #{valid_id}
+	</select>
+	
+	<insert id="insert" parameterType="validateDto">
+		INSERT INTO validate
+		(valid_id, user_id, valid_type, valid_secret, valid_route, valid_expire)
+		VALUES
+		(#{valid_id}, #{user_id}, #{valid_type}, #{valid_secret}, #{valid_route}, #{valid_expire})
+	</insert>
+	
+	<delete id="delete" parameterType="java.lang.String">
+		DELETE FROM validate
+		WHERE
+		valid_id = #{valid_id}
+	</delete>
+</mapper>

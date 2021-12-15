@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cloud4u.acm.repository.SessionRepo">
+	<select id="select" parameterType="java.lang.String" resultType="sessionDto">
+		SELECT *
+		FROM session
+		WHERE
+		user_id = #{user_id}
+	</select>
+	<insert id="insert" parameterType="sessionDto">
+		INSERT INTO session
+		(ses_id, user_id, ses_ip, ses_detail, ses_expire)
+		VALUES
+		(#{ses_id}, #{user_id}, #{ses_ip}, #{ses_detail}, #{ses_expire})
+	</insert>
+	<delete id="delete" parameterType="sessionDto">
+		DELETE FROM session
+		WHERE
+		<choose>
+			<when test="ses_id != null and ses_id != ''">
+				ses_id = #{ses_id}
+			</when>
+			<otherwise>
+				user_id = #{user_id}
+			</otherwise>
+		</choose>
+	</delete>
+</mapper>

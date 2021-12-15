@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cloud4u.acm.repository.ResourceRepo">
+
+	<select id="selectResource" parameterType="resourceDto" resultType="resourceDto">
+		SELECT *
+		FROM resource
+		<where>
+			<if test="res_name != null and res_name != ''">
+				res_name = #{res_name}
+			</if>
+			<if test="res_path != null and res_path != ''">
+				AND res_path = #{res_path}
+			</if>
+		</where>
+	</select>
+
+	<insert id="insertResource" parameterType="resourceDto">
+		INSERT INTO resource
+		(res_id, res_name, res_path, res_info, res_desc)
+		VALUES
+		(#{res_id}, #{res_name}, #{res_path}, #{res_info}, #{res_desc})
+	</insert>
+	
+	<select id="selectPermission" parameterType="resourceDto" resultType="java.lang.String">
+		SELECT permission
+		FROM identity_resource
+		WHERE iden_id = (SELECT iden_id
+			FROM user
+			WHERE
+			user_id = #{user_id})
+		AND res_id = (SELECT res_id
+			FROM resource
+			<where>
+				<if test="res_name != null and res_name != ''">
+					res_name = #{res_name}
+				</if>
+				<if test="res_path != null and res_path != ''">
+					AND res_path = #{res_path}
+				</if>
+			</where>)
+	</select>
+
+	<insert id="insertPermission" parameterType="permissionDto">
+		INSERT INTO identity_resource
+		(iden_id, res_id, permission)
+		VALUES
+		(#{owner}, #{target}, #{permission})
+	</insert>
+	
+	<update id="updatePermission" parameterType="permissionDto">
+		UPDATE identity_resource
+		SET permission = #{permission}
+		WHERE iden_id = #{owner}
+		AND res_id = #{target}
+	</update>
+	
+	<delete id="deletePermission" parameterType="java.lang.String">
+		DELETE FROM identity_resource
+		WHERE iden_id = (SELECT iden_id
+			FROM user
+			WHERE
+			user_id = #{user_id})
+		AND res_id = (SELECT res_id
+			FROM resource
+			<where>
+				<if test="res_name != null and res_name != ''">
+					res_name = #{res_name}
+				</if>
+				<if test="res_path != null and res_path != ''">
+					AND res_path = #{res_path}
+				</if>
+			</where>)
+	</delete>
+
+</mapper>

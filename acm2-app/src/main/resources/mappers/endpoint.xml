@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cloud4u.acm.repository.EndpointRepo">
+
+	<select id="selectEndpoint" parameterType="endpointDto" resultType="endpointDto">
+		SELECT e.endpoint_ord, s.svc_url, m.suffix, m.method
+		FROM service s, endpoint e 
+		LEFT JOIN method m 
+		ON e.suffix = m.suffix
+		AND e.method = m.method
+		<where>
+			s.svc_id = e.svc_id
+			<if test="endpoint_ord != null and endpoint_ord != ''">
+				AND endpoint_ord = #{endpoint_ord}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertEndpoint" parameterType="endpointDto">
+		INSERT INTO endpoint
+		(endpoint_ord, svc_id, suffix, method)
+		VALUES
+		(#{endpoint_ord}, #{svc_id}, #{suffix}, #{method})
+		ON DUPLICATE KEY UPDATE
+		<if test="svc_id != null and svc_id !=''">
+			svc_id = #{svc_id}
+		</if>
+	</insert>
+	
+	<insert id="insertService" parameterType="endpointDto">
+		INSERT INTO service
+		(svc_id, svc_name, app_id, svc_url, svc_desc)
+		VALUES
+		(#{svc_id}, #{svc_name}, #{app_id}, #{svc_url}, #{svc_desc})
+	</insert>
+	
+	<select id="selectMethod" parameterType="methodDto">
+		SELECT *
+		FROM method
+		<where>
+			<if test="suffix != null and method != null and method != ''">
+				suffix = #{suffix}
+				AND method = #{method}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertMethod" parameterType="methodDto">
+		INSERT INTO method
+		(suffix, method)
+		VALUES
+		(#{suffix}, #{method})
+	</insert>
+	
+</mapper>

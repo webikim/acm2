@@ -1,0 +1,4 @@
+rootProject.name = 'acm2'
+
+include 'acm2-lib'
+include 'acm2-app'

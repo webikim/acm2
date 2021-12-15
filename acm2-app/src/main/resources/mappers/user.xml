@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="io.cloud4u.acm.repository.UserRepo">
+
+	<select id="selectUser" parameterType="userDto" resultType="userDto">
+		SELECT u.user_id, u.iden_id, u.user_name, u.user_email, u.user_password, u.user_type, u.user_loginfail, u.user_twopass, u.user_secret, u.user_status
+		FROM user u
+		<where>
+			<choose>
+				<when test="user_id != null and user_id != ''">
+					u.user_id = #{user_id}
+				</when>
+				<otherwise>
+					u.user_name = #{user_name}
+				</otherwise>
+			</choose>
+		</where>
+	</select>
+
+	<select id="selectUserAccount" parameterType="userDto" resultType="userDto">
+		<choose>
+			<when test="soc_id != null and soc_id != ''">
+				SELECT u.user_id, u.user_name, u.user_email, u.user_password, u.user_type, u.user_loginfail, u.user_twopass, u.user_secret, u.user_status, i.key_id
+					, s.soc_id
+					, s.soc_name
+				FROM identity i, user u
+				LEFT OUTER JOIN soc_id s
+				ON u.user_id = s.user_id
+				<if test="soc_id != null and soc_id != ''">
+					AND s.soc_id = #{soc_id}
+					AND s.soc_name = #{soc_name}
+				</if>
+			</when>
+			<otherwise>
+				SELECT u.user_id, u.user_name, u.user_email, u.user_password, u.user_type, u.user_loginfail, u.user_twopass, u.user_secret, u.user_status, i.key_id
+				FROM identity i, user u
+			</otherwise>
+		</choose>
+		<where>
+			u.iden_id = i.iden_id
+			<choose>
+				<when test="user_name != null and user_name != ''">
+					AND u.user_name = #{user_name}
+				</when>
+				<otherwise>
+					AND u.user_id = #{user_id}
+				</otherwise>
+			</choose>
+			AND u.user_password = #{user_password}
+		</where>
+	</select>
+	
+	<insert id="insertUser" parameterType="userDto">
+		INSERT INTO user
+		(user_id, iden_id, user_name, user_email, user_type, user_password, user_loginfail, user_twopass, user_secret, user_status)
+		VALUES
+		(#{user_id}, #{iden_id}, #{user_name}, #{user_email}, #{user_type}, #{user_password}, #{user_loginfail}, #{user_twopass}, #{user_secret}, #{user_status})
+	</insert>
+	
+	<update id="updateUser" parameterType="userDto">
+		UPDATE user
+		<set>
+			<if test="user_password != null and user_password != ''">
+				user_password = #{user_password},
+			</if>
+			<if test="user_loginfail != null">
+				user_loginfail = #{user_loginfail},
+			</if>
+			<if test="user_secret != null and user_secret != ''">
+				user_secret = #{user_secret},
+				<if test="user_twopass != null and user_twopass != ''">
+					user_twopass = #{user_twopass},
+				</if>
+			</if>
+			<if test="user_status != null and user_status != ''">
+				user_status = #{user_status},
+			</if>
+		</set>
+		<where>
+			<choose>
+				<when test="user_id != null and user_id != ''">
+					user_id = #{user_id}
+				</when>
+				<otherwise>
+					user_name = #{user_name}
+				</otherwise>
+			</choose>
+		</where>
+	</update>
+
+	<insert id="insertIdentity" parameterType="identityDto">
+		INSERT INTO identity
+		(iden_id, key_id, iden_status, iden_created)
+		VALUES
+		(#{iden_id}, #{key_id}, #{iden_status}, NOW())
+	</insert>
+</mapper>
